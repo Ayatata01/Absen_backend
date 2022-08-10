@@ -29,15 +29,24 @@ router.post(
       .withMessage("longitude is not a number")
       .isLength({ min: 1 })
       .withMessage("latitude is empty"),
+    body("radius").isNumeric().withMessage("radius is not a number"),
   ],
   authenticate.authenticateToken,
   kelasController.AddNewClass
 );
 
-// TODO : [POST] v1/class/present
+// TODO : [POST] v1/class/presence
 router.post(
   "/presence",
   authenticate.authenticateToken,
   kelasController.AddNewPresence
 );
+
+// TODO : [GET] v1/class/presence/class_code
+router.get(
+  "/presence/:class_code",
+  authenticate.authenticateToken,
+  kelasController.GetAllKehadiranByCode
+);
+
 module.exports = router;

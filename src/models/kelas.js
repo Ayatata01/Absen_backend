@@ -28,6 +28,10 @@ const Kelas = new Schema(
       type: Number,
       required: true,
     },
+    radius: {
+      type: Number,
+      required: true,
+    },
   },
   {
     timestamps: true,

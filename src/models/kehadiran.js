@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const Kehadiran = new Schema(
   {
-    class_id: {
+    class_code: {
       type: String,
       required: true,
     },

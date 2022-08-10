@@ -10,6 +10,8 @@ const KehadiranDB = require("../models/kehadiran");
 const res = require("express/lib/response");
 const randomCode = require("../../lib/generateRandomCode");
 
+const count = require("../../lib/getDistance");
+
 exports.AddNewClass = (req, res, next) => {
   const errors = validationResult(req);
 
@@ -29,6 +31,9 @@ exports.AddNewClass = (req, res, next) => {
     const description = req.body.description;
     const latitude = req.body.latitude;
     const longitude = req.body.longitude;
+    // ? CONVERT METER TO KM
+    const radius = req.body.radius / 1000.0;
+
     // console.log(req.user);
     const PostData = new KelasDB({
       owner_email: owner_email,
@@ -37,6 +42,7 @@ exports.AddNewClass = (req, res, next) => {
       description: description,
       latitude: latitude,
       longitude: longitude,
+      radius: radius,
     });
 
     PostData.save()
@@ -63,7 +69,7 @@ exports.AddNewPresence = (req, res, next) => {
   }
 
   const NewPresence = () => {
-    const class_id = req.body.class_id;
+    const class_code = req.body.class_code;
     const user_email = req.user.email;
     const student_name = req.body.student_name;
     const student_npm = req.body.student_npm;
@@ -71,7 +77,7 @@ exports.AddNewPresence = (req, res, next) => {
     const longitude = req.body.longitude;
 
     const PostData = new KehadiranDB({
-      class_id: class_id,
+      class_code: class_code,
       user_email: user_email,
       student_npm: student_npm,
       student_name: student_name,
@@ -79,43 +85,49 @@ exports.AddNewPresence = (req, res, next) => {
       longitude: longitude,
     });
 
-    KelasDB.find({ _id: class_id })
-      .then((resultFindById) => {
+    KelasDB.find({ class_code: class_code })
+      .then((resultFindByCodeClass) => {
         //   todo : jika kelas ditemukan
-        if (resultFindById.length > 0) {
+        if (resultFindByCodeClass.length > 0) {
+          // todo : count distance between class position and user position
+          const distance = count.distance(
+            resultFindByCodeClass[0]["latitude"],
+            resultFindByCodeClass[0]["longitude"],
+            latitude,
+            longitude,
+            "M"
+          );
+
+          // console.log(distance);
           // todo : jika latitude dan longitude kelas sama dengan punya user
-          if (
-            resultFindById[0]["latitude"] == latitude &&
-            resultFindById[0]["longitude"] == longitude
-          ) {
+          if (distance <= resultFindByCodeClass[0]["radius"]) {
             //   todo : check if user already presence in the class
-            KehadiranDB.find({ user_email: user_email }).then(
-              (resultKehadiranExist) => {
-                if (resultKehadiranExist.length > 0) {
-                  //   todo : if user presence send response user already presence in the class
-                  res.status(400).json({
-                    message: "Anda sudah hadir",
-                  });
-                  console.log(user_email);
-                } else {
-                  //   todo :  if user is not presence in the class
-                  PostData.save()
-                    .then((result) => {
-                      res.status(201).json({
-                        message: "Kehadiran is successfully added",
-                        data: result,
-                      });
-                    })
-                    .catch((err) => console.log(err));
-                }
+            KehadiranDB.find({
+              $or: [{ student_npm: student_npm }, { user_email: user_email }],
+            }).then((resultKehadiranExist) => {
+              if (resultKehadiranExist.length > 0) {
+                //   todo : if user presence send response user already presence in the class
+                res.status(400).json({
+                  message: "Anda sudah hadir dengan npm " + student_npm,
+                });
+              } else {
+                //   todo :  if user is not presence in the class
+                PostData.save()
+                  .then((result) => {
+                    res.status(201).json({
+                      message: "Kehadiran is successfully added",
+                      data: result,
+                    });
+                  })
+                  .catch((err) => console.log(err));
               }
-            );
+            });
           } else {
             //   todo : if user is not in the same location
             res.status(400).json({
               message: "Gagal anda tidak berada di lokasi yang sama",
             });
-            // ?console.log(resultFindById[0]["latitude"]);
+            // ?console.log(resultFindByCodeClass[0]["latitude"]);
           }
         } else {
           // todo : if data not exists send data not found
@@ -128,4 +140,30 @@ exports.AddNewPresence = (req, res, next) => {
   };
 
   NewPresence();
+};
+
+exports.GetAllKehadiranByCode = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const err = new Error("Invalid Value");
+    err.errorStatus = 400;
+    err.message = errors;
+
+    throw err;
+  }
+
+  const class_code = req.params.class_code;
+
+  console.log(class_code);
+
+  KehadiranDB.find({ class_code: class_code })
+    .then((result) => {
+      if (result.length > 0) {
+        res.status(200).json({
+          data: result,
+        });
+      }
+    })
+    .catch((err) => console.log(err));
 };
