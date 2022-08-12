@@ -35,6 +35,13 @@ router.post(
   kelasController.AddNewClass
 );
 
+// TODO : [GET] v1/class/user_email
+router.get(
+  "/:user_email",
+  authenticate.authenticateToken,
+  kelasController.GetAllClassesByEmail
+);
+
 // TODO : [POST] v1/class/presence
 router.post(
   "/presence",

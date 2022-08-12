@@ -163,7 +163,44 @@ exports.GetAllKehadiranByCode = (req, res, next) => {
         res.status(200).json({
           data: result,
         });
+      } else {
+        res.status(400).json({
+          message: "Data not found",
+        });
       }
     })
     .catch((err) => console.log(err));
+};
+
+exports.GetAllClassesByEmail = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const err = new Error("Invalid Value");
+    err.errorStatus = 400;
+    err.message = errors;
+
+    throw err;
+  }
+
+  const user_email = req.params.user_email;
+  if (req.user.email == user_email) {
+    KelasDB.find({ owner_email: user_email })
+      .then((result) => {
+        if (result.length > 0) {
+          res.status(200).json({
+            data: result,
+          });
+        } else {
+          res.status(400).json({
+            message: "Data not found",
+          });
+        }
+      })
+      .catch((err) => console.log(err));
+  } else {
+    res.status(403).json({
+      message: "Forbidden",
+    });
+  }
 };
