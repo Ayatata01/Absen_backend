@@ -107,7 +107,7 @@ exports.AddNewPresence = (req, res, next) => {
             }).then((resultKehadiranExist) => {
               if (resultKehadiranExist.length > 0) {
                 //   todo : if user presence send response user already presence in the class
-                res.status(500).json({
+                res.status(200).json({
                   message: "Anda sudah hadir dengan npm " + student_npm,
                 });
               } else {
@@ -124,7 +124,7 @@ exports.AddNewPresence = (req, res, next) => {
             });
           } else {
             //   todo : if user is not in the same location
-            res.status(500).json({
+            res.status(200).json({
               message: "Gagal anda tidak berada di lokasi yang sama",
             });
             // ?console.log(resultFindByCodeClass[0]["latitude"]);
