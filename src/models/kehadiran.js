@@ -28,6 +28,10 @@ const Kehadiran = new Schema(
       type: Number,
       required: true,
     },
+    class_info: {
+      type: Object,
+      required: true,
+    },
   },
   {
     timestamps: true,

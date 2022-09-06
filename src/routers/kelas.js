@@ -56,4 +56,11 @@ router.get(
   kelasController.GetAllKehadiranByCode
 );
 
+// TODO : [GET] v1/class/ispresence/user_email
+router.get(
+  "/ispresence/:user_email",
+  authenticate.authenticateToken,
+  kelasController.GetAllKehadiranByUserEmail
+);
+
 module.exports = router;

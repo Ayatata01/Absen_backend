@@ -76,15 +76,6 @@ exports.AddNewPresence = (req, res, next) => {
     const latitude = req.body.latitude;
     const longitude = req.body.longitude;
 
-    const PostData = new KehadiranDB({
-      class_code: class_code,
-      user_email: user_email,
-      student_npm: student_npm,
-      student_name: student_name,
-      latitude: latitude,
-      longitude: longitude,
-    });
-
     KelasDB.find({ class_code: class_code })
       .then((resultFindByCodeClass) => {
         //   todo : jika kelas ditemukan
@@ -103,8 +94,9 @@ exports.AddNewPresence = (req, res, next) => {
           if (distance <= resultFindByCodeClass[0]["radius"]) {
             //   todo : check if user already presence in the class
             KehadiranDB.find({
-              $or: [{ student_npm: student_npm }, { user_email: user_email }],
+              $and: [{ class_code: class_code }, { student_npm: student_npm }],
             }).then((resultKehadiranExist) => {
+              // console.log(resultKehadiranExist);
               if (resultKehadiranExist.length > 0) {
                 //   todo : if user presence send response user already presence in the class
                 res.status(200).json({
@@ -112,14 +104,25 @@ exports.AddNewPresence = (req, res, next) => {
                 });
               } else {
                 //   todo :  if user is not presence in the class
-                PostData.save()
-                  .then((result) => {
-                    res.status(201).json({
-                      message: "Kehadiran is successfully added",
-                      data: result,
-                    });
-                  })
-                  .catch((err) => console.log(err));
+                KelasDB.find({ class_code: class_code }).then((data) => {
+                  const PostData = new KehadiranDB({
+                    class_code: class_code,
+                    user_email: user_email,
+                    student_npm: student_npm,
+                    student_name: student_name,
+                    latitude: latitude,
+                    longitude: longitude,
+                    class_info: data,
+                  });
+                  PostData.save()
+                    .then((result) => {
+                      res.status(201).json({
+                        message: "Kehadiran is successfully added",
+                        data: result,
+                      });
+                    })
+                    .catch((err) => console.log(err));
+                });
               }
             });
           } else {
@@ -155,7 +158,7 @@ exports.GetAllKehadiranByCode = (req, res, next) => {
 
   const class_code = req.params.class_code;
 
-  console.log(class_code);
+  // console.log(class_code);
 
   KehadiranDB.find({ class_code: class_code })
     .then((result) => {
@@ -186,6 +189,40 @@ exports.GetAllClassesByEmail = (req, res, next) => {
   const user_email = req.params.user_email;
   if (req.user.email == user_email) {
     KelasDB.find({ owner_email: user_email })
+      .then((result) => {
+        if (result.length > 0) {
+          res.status(200).json({
+            data: result,
+          });
+        } else {
+          res.status(400).json({
+            message: "Data not found",
+          });
+        }
+      })
+      .catch((err) => console.log(err));
+  } else {
+    res.status(403).json({
+      message: "Forbidden",
+    });
+  }
+};
+
+exports.GetAllKehadiranByUserEmail = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const err = new Error("Invalid Value");
+    err.errorStatus = 400;
+    err.message = errors;
+
+    throw err;
+  }
+
+  const user_email = req.params.user_email;
+
+  if (req.user.email == user_email) {
+    KehadiranDB.find({ user_email: user_email })
       .then((result) => {
         if (result.length > 0) {
           res.status(200).json({
