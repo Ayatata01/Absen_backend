@@ -63,4 +63,38 @@ router.get(
   kelasController.GetAllKehadiranByUserEmail
 );
 
+// TODO : [DELETE] v1/class/delete/class_code
+router.delete(
+  "/delete/:class_code",
+  authenticate.authenticateToken,
+  kelasController.DeleteClassByClassCode
+);
+
+// TODO : [DELETE] v1/class/presence/delete/class_code
+router.delete(
+  "/presence/delete/:class_code",
+  authenticate.authenticateToken,
+  kelasController.DeleteKehadiranByClassCode
+);
+
+// TODO : [GET] v1/class/search/class_code
+router.get(
+  "/search/:class_name",
+  authenticate.authenticateToken,
+  kelasController.SearchKelasByClassName
+);
+
+// TODO : [GET] v1/class/presence/search/class_code
+router.get(
+  "/presence/search/:class_name",
+  authenticate.authenticateToken,
+  kelasController.SearchPresenceByClassName
+);
+
+// TODO : [PUT] v1/class/update/:class_code
+router.post(
+  "/update/:id",
+  authenticate.authenticateToken,
+  kelasController.UpdateKelasByClassCode
+);
 module.exports = router;

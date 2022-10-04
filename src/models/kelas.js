@@ -8,6 +8,10 @@ const Kelas = new Schema(
       type: String,
       required: true,
     },
+    owner_username: {
+      type: String,
+      required: true,
+    },
     class_code: {
       type: String,
       required: true,
@@ -30,6 +34,10 @@ const Kelas = new Schema(
     },
     radius: {
       type: Number,
+      required: true,
+    },
+    status: {
+      type: Boolean,
       required: true,
     },
   },

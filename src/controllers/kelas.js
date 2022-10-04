@@ -25,24 +25,27 @@ exports.AddNewClass = (req, res, next) => {
 
   const AddClass = () => {
     const owner_email = req.user.email;
-    const class_code =
-      req.body.class_name + randomCode.findUniqCode().toString();
+    const owner_username = req.user.username;
+    const class_code = randomCode.findUniqCode().toString();
     const class_name = req.body.class_name;
     const description = req.body.description;
     const latitude = req.body.latitude;
     const longitude = req.body.longitude;
+    const status = req.body.status || true;
     // ? CONVERT METER TO KM
     const radius = req.body.radius / 1000.0;
 
     // console.log(req.user);
     const PostData = new KelasDB({
       owner_email: owner_email,
+      owner_username: owner_username,
       class_name: class_name,
       class_code: class_code,
       description: description,
       latitude: latitude,
       longitude: longitude,
       radius: radius,
+      status: status,
     });
 
     PostData.save()
@@ -80,62 +83,65 @@ exports.AddNewPresence = (req, res, next) => {
       .then((resultFindByCodeClass) => {
         //   todo : jika kelas ditemukan
         if (resultFindByCodeClass.length > 0) {
-          // todo : count distance between class position and user position
-          const distance = count.distance(
-            resultFindByCodeClass[0]["latitude"],
-            resultFindByCodeClass[0]["longitude"],
-            latitude,
-            longitude,
-            "M"
-          );
-
-          // console.log(distance);
-          // todo : jika latitude dan longitude kelas sama dengan punya user
-          if (distance <= resultFindByCodeClass[0]["radius"]) {
-            //   todo : check if user already presence in the class
-            KehadiranDB.find({
-              $and: [{ class_code: class_code }, { student_npm: student_npm }],
-            }).then((resultKehadiranExist) => {
-              // console.log(resultKehadiranExist);
-              if (resultKehadiranExist.length > 0) {
-                //   todo : if user presence send response user already presence in the class
-                res.status(200).json({
-                  message: "Anda sudah hadir dengan npm " + student_npm,
-                });
-              } else {
-                //   todo :  if user is not presence in the class
-                KelasDB.find({ class_code: class_code }).then((data) => {
-                  const PostData = new KehadiranDB({
-                    class_code: class_code,
-                    user_email: user_email,
-                    student_npm: student_npm,
-                    student_name: student_name,
-                    latitude: latitude,
-                    longitude: longitude,
-                    class_info: data,
+          if (resultFindByCodeClass[0]["status"] == true) {
+            // todo : count distance between class position and user position
+            const distance = count.distance(
+              resultFindByCodeClass[0]["latitude"],
+              resultFindByCodeClass[0]["longitude"],
+              latitude,
+              longitude,
+              "M"
+            );
+            // todo : jika latitude dan longitude kelas sama dengan punya user
+            if (distance <= resultFindByCodeClass[0]["radius"]) {
+              //   todo : check if user already presence in the class
+              KehadiranDB.find({
+                $and: [{ class_code: class_code }, { user_email: user_email }],
+              }).then((resultKehadiranExist) => {
+                if (resultKehadiranExist.length > 0) {
+                  //   todo : if user presence send response user already presence in the class
+                  res.status(200).json({
+                    message: "Anda sudah hadir di kelas",
                   });
-                  PostData.save()
-                    .then((result) => {
-                      res.status(201).json({
-                        message: "Kehadiran is successfully added",
-                        data: result,
-                      });
-                    })
-                    .catch((err) => console.log(err));
-                });
-              }
-            });
+                } else {
+                  //   todo :  if user is not presence in the class
+                  KelasDB.find({ class_code: class_code }).then((data) => {
+                    const PostData = new KehadiranDB({
+                      class_code: class_code,
+                      user_email: user_email,
+                      student_npm: student_npm,
+                      student_name: student_name,
+                      latitude: latitude,
+                      longitude: longitude,
+                      class_info: data,
+                    });
+                    PostData.save()
+                      .then((result) => {
+                        res.status(201).json({
+                          message: "Kehadiran anda sudah di simpan",
+                          data: result,
+                        });
+                      })
+                      .catch((err) => console.log(err));
+                  });
+                }
+              });
+            } else {
+              //   todo : if user is not in the same location
+              res.status(200).json({
+                message: "Gagal, anda tidak berada di lokasi yang sama",
+              });
+              // ?console.log(resultFindByCodeClass[0]["latitude"]);
+            }
           } else {
-            //   todo : if user is not in the same location
             res.status(200).json({
-              message: "Gagal anda tidak berada di lokasi yang sama",
+              message: "Kelas sedang offline",
             });
-            // ?console.log(resultFindByCodeClass[0]["latitude"]);
           }
         } else {
           // todo : if data not exists send data not found
           res.status(404).json({
-            message: "data not found",
+            message: "Kelas tidak ada",
           });
         }
       })
@@ -240,4 +246,158 @@ exports.GetAllKehadiranByUserEmail = (req, res, next) => {
       message: "Forbidden",
     });
   }
+};
+
+exports.DeleteClassByClassCode = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const err = new Error("Invalid Value");
+    err.errorStatus = 400;
+    err.message = errors;
+
+    throw err;
+  }
+
+  class_code = req.params.class_code;
+
+  KelasDB.find({ class_code: class_code }).then((data) => {
+    if (data.length > 0) {
+      if (data[0].owner_email === req.user.email) {
+        KehadiranDB.deleteMany({ class_code: class_code }).then(() => {
+          KelasDB.deleteOne({ class_code: class_code }).then(() => {
+            res.status(200).json({
+              message: `Kelas berhasil di hapus`,
+            });
+          });
+        });
+      }
+    } else {
+      res.status(404).json({
+        message: "Kelas tidak ditemukan",
+      });
+    }
+  });
+};
+
+exports.DeleteKehadiranByClassCode = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const err = new Error("Invalid Value");
+    err.errorStatus = 400;
+    err.message = errors;
+
+    throw err;
+  }
+
+  class_code = req.params.class_code;
+
+  // KehadiranDB.find({ class_code: class_code }).then((data) => {
+  //   console.log(data);
+  // });
+  KehadiranDB.deleteOne({
+    $and: [{ class_code: class_code, user_email: req.user.email }],
+  }).then(() => {
+    res.status(200).json({
+      message: "Kehadiran berhasil dihapus",
+    });
+  });
+};
+
+exports.SearchKelasByClassName = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const err = new Error("Invalid Value");
+    err.errorStatus = 400;
+    err.message = errors;
+
+    throw err;
+  }
+
+  class_name = req.params.class_name;
+
+  KelasDB.find({
+    $and: [
+      { class_name: { $regex: class_name, $options: "i" } },
+      { owner_email: { $regex: req.user.email } },
+    ],
+  }).then((data) => {
+    res.status(200).json({
+      data,
+    });
+  });
+};
+
+exports.SearchPresenceByClassName = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const err = new Error("Invalid Value");
+    err.errorStatus = 400;
+    err.message = errors;
+
+    throw err;
+  }
+
+  class_name = req.params.class_name;
+
+  KehadiranDB.find({
+    $and: [
+      {
+        class_info: {
+          $elemMatch: { class_name: { $regex: class_name, $options: "i" } },
+        },
+      },
+      { user_email: { $regex: req.user.email } },
+    ],
+  }).then((data) => {
+    res.status(200).json({
+      data,
+    });
+  });
+};
+
+exports.UpdateKelasByClassCode = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const err = new Error("Invalid Value");
+    err.errorStatus = 400;
+    err.message = errors;
+
+    throw err;
+  }
+
+  const id = req.params.id;
+  const status = req.body.status;
+
+  KelasDB.findById(id)
+    .then((data) => {
+      if (!data) {
+        const err = new Error("Data Tidak Ditemukan");
+        err.errorStatus = 400;
+        throw err;
+      }
+
+      data.owner_email = data.owner_email;
+      data.owner_username = data.owner_username;
+      data.class_code = data.class_code;
+      data.class_name = data.class_name;
+      data.description = data.description;
+      data.latitude = data.latitude;
+      data.longitude = data.longitude;
+      data.radius = data.radius;
+      data.status = status;
+
+      return data.save();
+    })
+    .then((savedData) => {
+      res.status(200).json({
+        class_code: savedData.class_code,
+        status: savedData.status,
+      });
+    })
+    .catch((err) => next(err));
 };

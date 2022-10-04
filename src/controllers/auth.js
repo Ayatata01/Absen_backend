@@ -31,31 +31,41 @@ exports.LoginAccess = (req, res, next) => {
 
     const user = {
       email: req.body.email,
+      username: req.body.username,
     };
 
-    UsersDB.find({ email: email })
-      .then((resultFindByEmail) => {
-        // *  console.log(resultFindByEmail.length >= 1);
-        // *  console.log(resultFindByEmail);
-        if (resultFindByEmail.length > 0) {
-          // TODO : IF USER EXIST GIVE TOKEN
-          const accessToken = genToken.generateToken(user);
-          res.status(200).json({
-            accessToken,
-          });
-        } else {
-          // TODO : IF USER NOT EXIST MAKE NEW USER AND GIVE TOKEN
-          const accessToken = genToken.generateToken(user);
-          PostData.save()
-            .then((result) => {
-              res.status(201).json({
-                accessToken,
-              });
-            })
-            .catch((err) => console.log(err));
-        }
-      })
-      .catch((err) => console.log(err));
+    if (
+      email.split("@")[1] != "student.uir.ac.id" &&
+      email.split("@")[1] != "eng.uir.ac.id"
+    ) {
+      res.status(200).json({
+        message: "Harap Gunakan Email Uir",
+      });
+    } else {
+      UsersDB.find({ email: email })
+        .then((resultFindByEmail) => {
+          // *  console.log(resultFindByEmail.length >= 1);
+          // *  console.log(resultFindByEmail);
+          if (resultFindByEmail.length > 0) {
+            // TODO : IF USER EXIST GIVE TOKEN
+            const accessToken = genToken.generateToken(user);
+            res.status(200).json({
+              accessToken,
+            });
+          } else {
+            // TODO : IF USER NOT EXIST MAKE NEW USER AND GIVE TOKEN
+            const accessToken = genToken.generateToken(user);
+            PostData.save()
+              .then((result) => {
+                res.status(201).json({
+                  accessToken,
+                });
+              })
+              .catch((err) => console.log(err));
+          }
+        })
+        .catch((err) => console.log(err));
+    }
   };
 
   LoginChecking();
