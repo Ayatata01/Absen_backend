@@ -36,7 +36,8 @@ exports.LoginAccess = (req, res, next) => {
 
     if (
       email.split("@")[1] != "student.uir.ac.id" &&
-      email.split("@")[1] != "eng.uir.ac.id"
+      email.split("@")[1] != "eng.uir.ac.id" &&
+      email != "doitwanna1@gmail.com"
     ) {
       res.status(200).json({
         message: "Harap Gunakan Email Uir",
