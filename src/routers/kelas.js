@@ -49,6 +49,13 @@ router.post(
   kelasController.AddNewPresence
 );
 
+// TODO : [GET] v1/class/presence/count/:owner_email
+router.get(
+  "/kehadiran/count",
+  authenticate.authenticateToken,
+  kelasController.PresenceCountByOwnerEmail
+);
+
 // TODO : [GET] v1/class/presence/class_code
 router.get(
   "/presence/:class_code",
@@ -97,4 +104,5 @@ router.post(
   authenticate.authenticateToken,
   kelasController.UpdateKelasByClassCode
 );
+
 module.exports = router;

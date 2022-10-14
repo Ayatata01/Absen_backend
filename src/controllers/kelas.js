@@ -193,6 +193,7 @@ exports.GetAllClassesByEmail = (req, res, next) => {
   }
 
   const user_email = req.params.user_email;
+
   if (req.user.email == user_email) {
     KelasDB.find({ owner_email: user_email })
       .then((result) => {
@@ -400,4 +401,61 @@ exports.UpdateKelasByClassCode = (req, res, next) => {
       });
     })
     .catch((err) => next(err));
+};
+
+exports.PresenceCountByOwnerEmail = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const err = new Error("Invalid Value");
+    err.errorStatus = 400;
+    err.message = errors;
+
+    throw err;
+  }
+
+  const owner_email = req.user.email;
+  const countKehadiran = [];
+  const countClassName = [];
+
+  // KehadiranDB.find({
+  //   class_info: { $elemMatch: { owner_email: owner_email } },
+  // }).then((data) => {
+  //   data.map((value) => {
+  //     // console.log(value.class_code);
+  //     countClassCode.push(value.class_code);
+  //   });
+  //   console.log(countClassCode);
+  // });
+
+  KehadiranDB.aggregate([
+    { $unwind: "$class_info" },
+    {
+      $group: {
+        _id: "$class_info.class_code",
+        KodeCount: { $sum: 1 },
+        Subject: { $push: "$class_info.class_name" },
+        Class: { $push: "$class_info.class_name" },
+      },
+    },
+    {
+      $project: {
+        KodeCount: 1,
+        ClassCount: { $size: "$Subject" },
+        Class: "$Class",
+      },
+    },
+  ]).then((data) => {
+    data.map((value) => {
+      // console.log(value);
+      countKehadiran.push(value.KodeCount);
+      countClassName.push(value.Class + "_" + value._id);
+    });
+    // console.log(countClassName);
+    // console.log(countKehadiran);
+    res.status(200).json({
+      ClassName: countClassName,
+      CountResult: countKehadiran,
+    });
+  });
 };
