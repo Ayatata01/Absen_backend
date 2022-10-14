@@ -429,6 +429,7 @@ exports.PresenceCountByOwnerEmail = (req, res, next) => {
   // });
 
   KehadiranDB.aggregate([
+    { $match: { class_info: { $elemMatch: { owner_email: owner_email } } } },
     { $unwind: "$class_info" },
     {
       $group: {
@@ -447,7 +448,7 @@ exports.PresenceCountByOwnerEmail = (req, res, next) => {
     },
   ]).then((data) => {
     data.map((value) => {
-      // console.log(value);
+      console.log(value);
       countKehadiran.push(value.KodeCount);
       countClassName.push(value.Class + "_" + value._id);
     });
