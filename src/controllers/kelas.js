@@ -448,9 +448,10 @@ exports.PresenceCountByOwnerEmail = (req, res, next) => {
     },
   ]).then((data) => {
     data.map((value) => {
-      console.log(value);
+      // console.log(value);
+      const hitungKelas = value.Class.length;
       countKehadiran.push(value.KodeCount);
-      countClassName.push(value.Class + "_" + value._id);
+      countClassName.push(value.Class[hitungKelas - 1] + "_" + value._id);
     });
     // console.log(countClassName);
     // console.log(countKehadiran);
