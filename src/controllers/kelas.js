@@ -173,10 +173,7 @@ exports.GetAllKehadiranByCode = (req, res, next) => {
   }
 
   const class_code = req.params.class_code;
-  const tanggal = req.params.tanggal;
-  const tgl = req.body.tanggal;
-
-  console.log(tgl === "2022-10-30");
+  const tgl = req.params.tgl.replaceAll(/\s/g, "");
 
   KehadiranDB.find({
     $and: [{ class_code: class_code }, { tanggal_dibuat: tgl }],
