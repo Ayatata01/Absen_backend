@@ -123,7 +123,7 @@ exports.AddNewPresence = (req, res, next) => {
                       latitude: latitude,
                       longitude: longitude,
                       class_info: data,
-                      tanggal_dibuat: "2022-10-31",
+                      tanggal_dibuat: tanggalSekarang(),
                     });
                     PostData.save()
                       .then((result) => {
