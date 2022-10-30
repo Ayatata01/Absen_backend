@@ -32,6 +32,10 @@ const Kehadiran = new Schema(
       type: Object,
       required: true,
     },
+    tanggal_dibuat: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

@@ -79,6 +79,15 @@ exports.AddNewPresence = (req, res, next) => {
     const latitude = req.body.latitude;
     const longitude = req.body.longitude;
 
+    const tanggalSekarang = () => {
+      let today = new Date();
+      var dd = String(today.getDate()).padStart(2, "0");
+      var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+      var yyyy = today.getFullYear();
+      today = yyyy + "-" + mm + "-" + dd;
+      return today;
+    };
+
     KelasDB.find({ class_code: class_code })
       .then((resultFindByCodeClass) => {
         //   todo : jika kelas ditemukan
@@ -114,6 +123,7 @@ exports.AddNewPresence = (req, res, next) => {
                       latitude: latitude,
                       longitude: longitude,
                       class_info: data,
+                      tanggal_dibuat: "2022-10-31",
                     });
                     PostData.save()
                       .then((result) => {
@@ -163,10 +173,14 @@ exports.GetAllKehadiranByCode = (req, res, next) => {
   }
 
   const class_code = req.params.class_code;
+  const tanggal = req.params.tanggal;
+  const tgl = req.body.tanggal;
 
-  // console.log(class_code);
+  console.log(tgl === "2022-10-30");
 
-  KehadiranDB.find({ class_code: class_code })
+  KehadiranDB.find({
+    $and: [{ class_code: class_code }, { tanggal_dibuat: tgl }],
+  })
     .then((result) => {
       if (result.length > 0) {
         res.status(200).json({
@@ -174,7 +188,7 @@ exports.GetAllKehadiranByCode = (req, res, next) => {
         });
       } else {
         res.status(400).json({
-          message: "Data not found",
+          message: "Kehadiran tidak ditemukan",
         });
       }
     })

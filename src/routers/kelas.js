@@ -58,7 +58,7 @@ router.get(
 
 // TODO : [GET] v1/class/presence/class_code
 router.get(
-  "/presence/:class_code",
+  "/presence/:class_code/:tanggal",
   authenticate.authenticateToken,
   kelasController.GetAllKehadiranByCode
 );
