@@ -317,6 +317,31 @@ exports.DeleteKehadiranByClassCode = (req, res, next) => {
   });
 };
 
+exports.DeleteKehadiranById = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const err = new Error("Invalid Value");
+    err.errorStatus = 400;
+    err.message = errors;
+
+    throw err;
+  }
+
+  id = req.params.id;
+
+  // KehadiranDB.find({ class_code: class_code }).then((data) => {
+  //   console.log(data);
+  // });
+  KehadiranDB.deleteOne({
+    $and: [{ _id: id, user_email: req.user.email }],
+  }).then(() => {
+    res.status(200).json({
+      message: "Kehadiran berhasil dihapus",
+    });
+  });
+};
+
 exports.SearchKelasByClassName = (req, res, next) => {
   const errors = validationResult(req);
 
@@ -385,8 +410,9 @@ exports.UpdateKelasByClassCode = (req, res, next) => {
   const id = req.params.id;
   const status = req.body.status;
 
-  KelasDB.findById(id)
+  KelasDB.find({ class_code: id })
     .then((data) => {
+      console.log(data);
       if (!data) {
         const err = new Error("Data Tidak Ditemukan");
         err.errorStatus = 400;

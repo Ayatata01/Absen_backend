@@ -84,6 +84,13 @@ router.delete(
   kelasController.DeleteKehadiranByClassCode
 );
 
+// TODO : [DELETE] v1/class/presence/delete/id
+router.delete(
+  "/presence/delete/mahasiswa/:id",
+  authenticate.authenticateToken,
+  kelasController.DeleteKehadiranById
+);
+
 // TODO : [GET] v1/class/search/class_code
 router.get(
   "/search/:class_name",
@@ -98,7 +105,7 @@ router.get(
   kelasController.SearchPresenceByClassName
 );
 
-// TODO : [PUT] v1/class/update/:class_code
+// TODO : [PUT] v1/class/update/:id
 router.post(
   "/update/:id",
   authenticate.authenticateToken,
