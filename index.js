@@ -64,3 +64,5 @@ app.use((error, req, res, next) => {
     data: data,
   });
 });
+
+module.exports = app;
