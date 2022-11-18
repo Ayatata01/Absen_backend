@@ -410,34 +410,18 @@ exports.UpdateKelasByClassCode = (req, res, next) => {
   const id = req.params.id;
   const status = req.body.status;
 
-  KelasDB.find({ class_code: id })
-    .then((data) => {
-      console.log(data);
-      if (!data) {
-        const err = new Error("Data Tidak Ditemukan");
-        err.errorStatus = 400;
-        throw err;
-      }
-
-      data.owner_email = data.owner_email;
-      data.owner_username = data.owner_username;
-      data.class_code = data.class_code;
-      data.class_name = data.class_name;
-      data.description = data.description;
-      data.latitude = data.latitude;
-      data.longitude = data.longitude;
-      data.radius = data.radius;
-      data.status = status;
-
-      return data.save();
+  KelasDB.findOneAndUpdate({ _id: id }, { status: status })
+    .then((result) => {
+      KelasDB.find({ _id: id })
+        .then((data) => {
+          res.status(201).json({
+            class_code: data[0].class_code,
+            status: data[0].status,
+          });
+        })
+        .catch((err) => console.log(err));
     })
-    .then((savedData) => {
-      res.status(200).json({
-        class_code: savedData.class_code,
-        status: savedData.status,
-      });
-    })
-    .catch((err) => next(err));
+    .catch((err) => console.log(err));
 };
 
 exports.PresenceCountByOwnerEmail = (req, res, next) => {
