@@ -81,12 +81,14 @@ exports.AddNewPresence = (req, res, next) => {
 
     const tanggalSekarang = () => {
       let today = new Date();
-      var dd = String(today.getDate()).padStart(2, "0");
-      var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+      var dd = String(today.getDate());
+      var mm = String(today.getMonth() + 1); //January is 0!
       var yyyy = today.getFullYear();
       today = yyyy + "-" + mm + "-" + dd;
       return today;
     };
+
+    console.log(tanggalSekarang());
 
     KelasDB.find({ class_code: class_code })
       .then((resultFindByCodeClass) => {
