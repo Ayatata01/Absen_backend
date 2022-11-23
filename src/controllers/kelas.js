@@ -79,13 +79,29 @@ exports.AddNewPresence = (req, res, next) => {
     const latitude = req.body.latitude;
     const longitude = req.body.longitude;
 
+    // const tanggalSekarang = () => {
+    //   let today = new Date().toLocaleString("en-US", {
+    //     timeZone: "Asia/Jakarta",
+    //   });
+    //   var dd = String(today.getDate());
+    //   var mm = String(today.getMonth() + 1); //January is 0!
+    //   var yyyy = today.getFullYear();
+    //   today = yyyy + "-" + mm + "-" + dd;
+    //   return today;
+    // };
+
     const tanggalSekarang = () => {
-      let today = new Date();
-      var dd = String(today.getDate() + 1);
-      var mm = String(today.getMonth() + 1); //January is 0!
-      var yyyy = today.getFullYear();
-      today = yyyy + "-" + mm + "-" + dd;
-      return today;
+      let today = new Date().toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        day: "numeric",
+        month: "numeric",
+        year: "numeric",
+      });
+      let sekarang = today.split("/");
+      let dd = sekarang[0];
+      let mm = sekarang[1];
+      let yyyy = sekarang[2];
+      return yyyy + "-" + mm + "-" + dd;
     };
 
     console.log(tanggalSekarang());
