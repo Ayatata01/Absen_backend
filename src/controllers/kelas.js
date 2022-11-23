@@ -81,7 +81,7 @@ exports.AddNewPresence = (req, res, next) => {
 
     const tanggalSekarang = () => {
       let today = new Date();
-      var dd = String(today.getDate());
+      var dd = String(today.getDate() + 1);
       var mm = String(today.getMonth() + 1); //January is 0!
       var yyyy = today.getFullYear();
       today = yyyy + "-" + mm + "-" + dd;
