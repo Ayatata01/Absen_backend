@@ -103,7 +103,23 @@ exports.AddNewPresence = (req, res, next) => {
       let yyyy = sekarang[2];
       return yyyy + "-" + mm + "-" + dd;
     };
+    const timeNow = () => {
+      let now = new Date().toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+      });
 
+      let time = now.split(".");
+      let jam = time[0];
+      let menit = time[1];
+      let detik = time[2];
+
+      return jam + ":" + menit + ":" + detik;
+    };
+
+    console.log(timeNow());
     console.log(tanggalSekarang());
 
     KelasDB.find({ class_code: class_code })
@@ -141,6 +157,7 @@ exports.AddNewPresence = (req, res, next) => {
                       latitude: latitude,
                       longitude: longitude,
                       class_info: data,
+                      jam_masuk: timeNow(),
                       tanggal_dibuat: tanggalSekarang(),
                     });
                     PostData.save()

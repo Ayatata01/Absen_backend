@@ -36,6 +36,10 @@ const Kehadiran = new Schema(
       type: String,
       required: true,
     },
+    jam_masuk: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
