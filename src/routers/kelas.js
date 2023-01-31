@@ -56,6 +56,13 @@ router.get(
   kelasController.PresenceCountByOwnerEmail
 );
 
+// TODO: [GET] v1/class/presence
+router.get(
+  "/presence/all/:class_code",
+  authenticate.authenticateToken,
+  kelasController.PresenceAll
+);
+
 // TODO : [GET] v1/class/presence/class_code
 router.get(
   "/presence/:class_code&:tgl",

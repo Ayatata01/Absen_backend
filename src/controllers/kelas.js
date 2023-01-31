@@ -227,6 +227,42 @@ exports.GetAllKehadiranByCode = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 
+exports.PresenceAll = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const err = new Error("Invalid Value");
+    err.errorStatus = 400;
+    err.message = errors;
+
+    throw err;
+  }
+
+  const class_code = req.params.class_code;
+  if (
+    req.user.email.split("@")[1] !== "eng.uir.ac.id" &&
+    req.user.email !== "doitwanna1@gmail.com"
+  ) {
+    res.status(400).json({
+      message: "Silahkan menggunakan akun dosen",
+    });
+  }
+
+  KehadiranDB.find({ class_code })
+    .sort({ tanggal_dibuat: 1 })
+    .then((result) => {
+      if (result.length > 0) {
+        res.status(200).json({
+          data: result,
+        });
+      } else {
+        res.status(400).json({
+          message: "Kehadiran tidak ditemukan",
+        });
+      }
+    });
+};
+
 exports.GetAllClassesByEmail = (req, res, next) => {
   const errors = validationResult(req);
 
