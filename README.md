@@ -25,6 +25,7 @@ API ini akan diintegrasikan dengan aplikasi android yang dibuat dengan framework
 1. node js/express
 2. mongoDB
 3. haversine method (metode pengukuran jarak antar koordinat)
+4. json web token (jwt)
 
 ### Cara Penggunaan
 
