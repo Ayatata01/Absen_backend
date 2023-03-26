@@ -28,5 +28,7 @@ API ini akan diintegrasikan dengan aplikasi android yang dibuat dengan framework
 4. json web token (jwt)
 
 ### Cara Penggunaan
+API INI BUKAN PUBLIC API HANYA AUTHOR YANG DAPAT MENGGUNAKAN.
+buka link berikut : https://documenter.getpostman.com/view/21857409/2s93RNyv6L
 
 AUTHOR : Yoga Rizya Pratama (yogarizya.p@gmail.com)
